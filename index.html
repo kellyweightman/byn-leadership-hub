@@ -237,82 +237,13 @@ let state = {
   resources: {},   // sectionId -> array of resource objects
   search: "",
   filterType: "all",
-  modal: null,     // {mode:'add'|'edit', sectionId, resource}
-  toast: "",
 };
 
-function uid(){ return Math.random().toString(36).slice(2,10) + Date.now().toString(36); }
-
-async function loadAll(){
+function loadAll(){
   for(const s of SECTIONS){
-    try{
-      const raw = localStorage.getItem('resources:'+s.id);
-      if(raw !== null){
-        state.resources[s.id] = JSON.parse(raw);
-      } else {
-        state.resources[s.id] = DEFAULT_RESOURCES[s.id] ? [...DEFAULT_RESOURCES[s.id]] : [];
-      }
-    }catch(e){
-      state.resources[s.id] = DEFAULT_RESOURCES[s.id] ? [...DEFAULT_RESOURCES[s.id]] : [];
-    }
+    state.resources[s.id] = DEFAULT_RESOURCES[s.id] ? [...DEFAULT_RESOURCES[s.id]] : [];
   }
   state.loaded = true;
-  render();
-}
-
-async function saveSection(sectionId){
-  try{
-    localStorage.setItem('resources:'+sectionId, JSON.stringify(state.resources[sectionId]));
-  }catch(e){
-    showToast("Couldn't save — your browser may be blocking local storage.");
-  }
-}
-
-function showToast(msg){
-  state.toast = msg;
-  render();
-  setTimeout(()=>{ state.toast=""; render(); }, 2600);
-}
-
-function openAddModal(sectionId){
-  state.modal = { mode:'add', sectionId, draft:{ title:"", type:"book", author:"", url:"", description:"" } };
-  render();
-}
-function openEditModal(sectionId, resource){
-  state.modal = { mode:'edit', sectionId, draft:{ ...resource } };
-  render();
-}
-function closeModal(){ state.modal = null; render(); }
-
-async function submitModal(e){
-  e.preventDefault();
-  const m = state.modal;
-  const d = m.draft;
-  if(!d.title || !d.title.trim()){ return; }
-  if(m.mode === 'add'){
-    const newItem = {
-      id: uid(), title:d.title.trim(), type:d.type, author:(d.author||"").trim(),
-      url:(d.url||"").trim(), description:(d.description||"").trim(), addedAt: new Date().toISOString()
-    };
-    state.resources[m.sectionId].unshift(newItem);
-    await saveSection(m.sectionId);
-    showToast("Resource added.");
-  } else {
-    const idx = state.resources[m.sectionId].findIndex(r=>r.id===d.id);
-    if(idx > -1){
-      state.resources[m.sectionId][idx] = { ...state.resources[m.sectionId][idx], ...d, title:d.title.trim() };
-      await saveSection(m.sectionId);
-      showToast("Resource updated.");
-    }
-  }
-  state.modal = null;
-  render();
-}
-
-async function deleteResource(sectionId, id){
-  state.resources[sectionId] = state.resources[sectionId].filter(r=>r.id!==id);
-  await saveSection(sectionId);
-  showToast("Resource removed.");
   render();
 }
 
@@ -330,8 +261,6 @@ function filteredResources(){
 
 function iconSvg(name){
   const icons = {
-    edit: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"></path></svg>`,
-    trash: `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"></path><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path></svg>`,
     external: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"></path><path d="M15 3h6v6"></path><path d="M10 14 21 3"></path></svg>`,
   };
   return icons[name] || "";
@@ -367,7 +296,7 @@ function render(){
         `).join('')}
       </ul>
       <div class="rail-footer">
-        <p>Resources built into each section are visible to everyone. Anything you add with the "+" button is saved only in this browser, on this device.</p>
+        <p>A read-only library curated by BYN leadership — browse, search, and open resources for each stage of leadership development.</p>
       </div>
     </nav>
   `;
@@ -383,15 +312,11 @@ function render(){
         ${r.description?`<p class="desc">${escapeHtml(r.description)}</p>`:''}
         ${r.url?`<div style="margin-top:8px;"><a class="url" href="${escapeAttr(r.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(r.url)} ${iconSvg('external')}</a></div>`:''}
       </div>
-      <div class="card-actions">
-        <button class="icon-btn" title="Edit" data-edit="${r.id}">${iconSvg('edit')}</button>
-        <button class="icon-btn danger" title="Delete" data-del="${r.id}">${iconSvg('trash')}</button>
-      </div>
     </div>
   `).join('') : `
     <div class="empty">
       <div class="display">Nothing here yet</div>
-      <p>Add the first resource to ${escapeHtml(activeSection.title)} — books, lessons, videos, or links your leaders should see.</p>
+      <p>No resources have been added to ${escapeHtml(activeSection.title)} yet — check back soon.</p>
     </div>
   `;
 
@@ -404,9 +329,8 @@ function render(){
             <div class="eyebrow">Section</div>
             <h2>${activeSection.title}</h2>
           </div>
-          <button class="btn btn-plus" id="addBtn">Add resource</button>
         </div>
-        <p class="section-desc">${escapeHtml(activeSection.description || "Curated training material for this stage of leadership development. Add, edit, or remove resources as your team's needs grow.")}</p>
+        <p class="section-desc">${escapeHtml(activeSection.description || "Curated training material for this stage of leadership development.")}</p>
 
         <div class="toolbar">
           <div class="search">
@@ -425,52 +349,9 @@ function render(){
         <div class="grid">${cards}</div>
       </main>
     </div>
-
-    ${state.modal ? renderModal() : ''}
-    <div class="toast ${state.toast?'show':''}" role="status">${escapeHtml(state.toast)}</div>
   `;
 
   attachHandlers();
-}
-
-function renderModal(){
-  const m = state.modal;
-  const d = m.draft;
-  return `
-    <div class="overlay" id="overlay">
-      <div class="modal" role="dialog" aria-modal="true" aria-label="${m.mode==='add'?'Add resource':'Edit resource'}">
-        <h3>${m.mode==='add' ? 'Add resource' : 'Edit resource'}</h3>
-        <form id="resourceForm">
-          <div class="field">
-            <label for="f-title">Title</label>
-            <input id="f-title" type="text" value="${escapeAttr(d.title)}" required autofocus>
-          </div>
-          <div class="field">
-            <label for="f-type">Type</label>
-            <select id="f-type">
-              ${Object.entries(TYPE_LABELS).map(([k,v])=>`<option value="${k}" ${d.type===k?'selected':''}>${v}</option>`).join('')}
-            </select>
-          </div>
-          <div class="field">
-            <label for="f-author">Author / Speaker (optional)</label>
-            <input id="f-author" type="text" value="${escapeAttr(d.author||'')}">
-          </div>
-          <div class="field">
-            <label for="f-url">Link (optional)</label>
-            <input id="f-url" type="text" placeholder="https://…" value="${escapeAttr(d.url||'')}">
-          </div>
-          <div class="field">
-            <label for="f-desc">Notes (optional)</label>
-            <textarea id="f-desc">${escapeHtml(d.description||'')}</textarea>
-          </div>
-          <div class="modal-actions">
-            <button type="button" class="btn-ghost" id="cancelBtn">Cancel</button>
-            <button type="submit" class="btn">${m.mode==='add'?'Add resource':'Save changes'}</button>
-          </div>
-        </form>
-      </div>
-    </div>
-  `;
 }
 
 function escapeHtml(s){
@@ -483,8 +364,6 @@ function attachHandlers(){
   document.querySelectorAll('[data-nav]').forEach(btn=>{
     btn.addEventListener('click', ()=> setActive(btn.getAttribute('data-nav')));
   });
-  const addBtn = document.getElementById('addBtn');
-  if(addBtn) addBtn.addEventListener('click', ()=> openAddModal(state.active));
 
   const searchInput = document.getElementById('searchInput');
   if(searchInput){
@@ -494,48 +373,8 @@ function attachHandlers(){
   if(typeFilter){
     typeFilter.addEventListener('change', (e)=>{ state.filterType = e.target.value; render(); });
   }
-
-  document.querySelectorAll('[data-edit]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const id = btn.getAttribute('data-edit');
-      const r = (state.resources[state.active]||[]).find(x=>x.id===id);
-      if(r) openEditModal(state.active, r);
-    });
-  });
-  document.querySelectorAll('[data-del]').forEach(btn=>{
-    btn.addEventListener('click', ()=>{
-      const id = btn.getAttribute('data-del');
-      if(confirm('Remove this resource?')) deleteResource(state.active, id);
-    });
-  });
-
-  const overlay = document.getElementById('overlay');
-  if(overlay){
-    overlay.addEventListener('click', (e)=>{ if(e.target.id==='overlay') closeModal(); });
-  }
-  const cancelBtn = document.getElementById('cancelBtn');
-  if(cancelBtn) cancelBtn.addEventListener('click', closeModal);
-
-  const form = document.getElementById('resourceForm');
-  if(form){
-    form.addEventListener('submit', (e)=>{
-      state.modal.draft.title = document.getElementById('f-title').value;
-      state.modal.draft.type = document.getElementById('f-type').value;
-      state.modal.draft.author = document.getElementById('f-author').value;
-      state.modal.draft.url = document.getElementById('f-url').value;
-      state.modal.draft.description = document.getElementById('f-desc').value;
-      submitModal(e);
-    });
-  }
-
-  document.addEventListener('keydown', escHandler);
 }
 
-function escHandler(e){
-  if(e.key === 'Escape' && state.modal){ closeModal(); }
-}
-
-let lastFocusId = null;
 function preserveFocus(id){
   const el = document.getElementById(id);
   if(el){ el.focus(); const v=el.value; el.value=''; el.value=v; }

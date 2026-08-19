@@ -352,7 +352,6 @@ let state = {
   active: SECTIONS[0].id,
   resources: {},   // sectionId -> array of resource objects
   search: "",
-  filterType: "all",
 };
 
 function loadAll(){
@@ -363,15 +362,13 @@ function loadAll(){
   render();
 }
 
-function setActive(id){ state.active = id; state.search=""; state.filterType="all"; render(); }
+function setActive(id){ state.active = id; state.search=""; render(); }
 
 function filteredResources(){
   const list = state.resources[state.active] || [];
   return list.filter(r=>{
-    const matchesType = state.filterType==='all' || r.type===state.filterType;
     const q = state.search.trim().toLowerCase();
-    const matchesSearch = !q || (r.title+" "+(r.author||"")+" "+(r.description||"")).toLowerCase().includes(q);
-    return matchesType && matchesSearch;
+    return !q || (r.title+" "+(r.author||"")+" "+(r.description||"")).toLowerCase().includes(q);
   });
 }
 
@@ -420,10 +417,7 @@ function render(){
   const cards = items.length ? items.map(r=>`
     <div class="card">
       <div class="card-main">
-        <div class="card-top">
-          <span class="tag tag-${r.type}">${TYPE_LABELS[r.type]||r.type}</span>
-          ${r.author?`<span class="card-meta">${escapeHtml(r.author)}</span>`:''}
-        </div>
+        ${r.author?`<div class="card-top"><span class="card-meta">${escapeHtml(r.author)}</span></div>`:''}
         <h3>${escapeHtml(r.title)}</h3>
         ${r.description?`<p class="desc">${escapeHtml(r.description)}</p>`:''}
         ${r.url?`<div style="margin-top:8px;"><a class="url" href="${escapeAttr(r.url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(r.url)} ${iconSvg('external')}</a></div>`:''}
@@ -452,14 +446,6 @@ function render(){
           <div class="search">
             <input type="text" id="searchInput" placeholder="Search this section…" value="${escapeAttr(state.search)}">
           </div>
-          <select class="filter" id="typeFilter">
-            <option value="all" ${state.filterType==='all'?'selected':''}>All types</option>
-            <option value="book" ${state.filterType==='book'?'selected':''}>Books</option>
-            <option value="video" ${state.filterType==='video'?'selected':''}>Videos</option>
-            <option value="audio" ${state.filterType==='audio'?'selected':''}>Audio</option>
-            <option value="article" ${state.filterType==='article'?'selected':''}>Articles</option>
-            <option value="link" ${state.filterType==='link'?'selected':''}>Links</option>
-          </select>
         </div>
 
         <div class="grid">${cards}</div>
@@ -484,10 +470,6 @@ function attachHandlers(){
   const searchInput = document.getElementById('searchInput');
   if(searchInput){
     searchInput.addEventListener('input', (e)=>{ state.search = e.target.value; render(); preserveFocus('searchInput'); });
-  }
-  const typeFilter = document.getElementById('typeFilter');
-  if(typeFilter){
-    typeFilter.addEventListener('change', (e)=>{ state.filterType = e.target.value; render(); });
   }
 }
 

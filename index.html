@@ -200,7 +200,7 @@ const SECTIONS = [
   { id:"g3-lessons", title:"G3 Lessons", short:"G3" },
   { id:"fnl", title:"FNL", short:"FNL" },
   { id:"mission-goals-policies", title:"Mission, Goals and Policies", short:"MGP" },
-  { id:"lunch-club", title:"Lunch Club", short:"LC" },
+  { id:"lunch-club", title:"Lunch Club", short:"LC", description:"20-minute devotions with a game, a scripture, and discussion questions for lunch club." },
 ];
 
 const TYPE_LABELS = { book:"Book", video:"Video", audio:"Audio", article:"Article", link:"Link" };
@@ -471,9 +471,51 @@ const DEFAULT_RESOURCES = {
   ],
   "lunch-club": [
     {
-      id:"seed-lc-wait-for-it", title:"Wait for It", type:"book",
-      url:"lunch-club/Wait_for_it.docx",
-      description:"A 20-minute high school devotion on Psalm 27:14 — waiting patiently on God. Includes a Rock-Paper-Scissors mixer game (\"Wait Your Turn\"), a teaching on the hummingbird's hover, a rubber-band slingshot object lesson, discussion questions, and a closing prayer.",
+      id:"seed-lc-attitude-pollution", title:"Attitude Pollution", type:"book",
+      url:"lunch-club/Attitude_Pollution.docx",
+      description:"A 20-minute high school devotion on complaining vs. gratitude, built around Philippians 2:14 (\"Do everything without complaining or arguing\"). Includes the Clean Sweep team game and a small-group discussion guide.",
+      addedAt: new Date().toISOString()
+    },
+    {
+      id:"seed-lc-fear-not", title:"Fear Not", type:"book",
+      url:"lunch-club/Fear_not.docx",
+      description:"A 20-minute high school devotion on fear, built around 2 Timothy 1:7 (\"God has not given us a spirit of fear and timidity, but of power, love, and self-discipline\"). Includes the Stare Down Showdown game and a small-group discussion guide.",
+      addedAt: new Date().toISOString()
+    },
+    {
+      id:"seed-lc-god-comes-near", title:"God Comes Near", type:"book",
+      url:"lunch-club/God_comes_near.docx",
+      description:"A 20-minute high school devotion on drawing near to God, built around James 4:8 (\"Come near to God, and God will come near to you\"). Includes the Math Duel Showdown up-front game and a small-group discussion guide.",
+      addedAt: new Date().toISOString()
+    },
+    {
+      id:"seed-lc-grounded", title:"Grounded", type:"book",
+      url:"lunch-club/Grounded.docx",
+      description:"A 20-minute high school devotion on standing on truth, built around 2 Timothy 3:16 (\"All Scripture is inspired by God and is useful to teach us what is true\"). Includes the Weight Guess Showdown team game and a small-group discussion guide.",
+      addedAt: new Date().toISOString()
+    },
+    {
+      id:"seed-lc-hold-on", title:"Hold On", type:"book",
+      url:"lunch-club/Hold_On.docx",
+      description:"A 20-minute high school devotion on standing firm, built around 1 Corinthians 16:13 (\"Be on your guard; stand firm in the faith; be courageous; be strong\"). Includes the Guard the Treasure stealth challenge and a small-group discussion guide.",
+      addedAt: new Date().toISOString()
+    },
+    {
+      id:"seed-lc-one-in-500-billion", title:"One in 500 Billion", type:"book",
+      url:"lunch-club/One_in_500_billion.docx",
+      description:"A 20-minute high school devotion on being fearfully and wonderfully made, built around Psalm 139:13–14. Includes the silent Lineup team-building challenge and a small-group discussion guide.",
+      addedAt: new Date().toISOString()
+    },
+    {
+      id:"seed-lc-shaped-on-purpose", title:"Shaped on Purpose", type:"book",
+      url:"lunch-club/Shaped_on_purpose.docx",
+      description:"A 20-minute high school devotion on being made with purpose, built around Isaiah 64:8 (\"We are like clay, and you are the potter\"). Includes the Build-a-Survivor team game and a small-group discussion guide.",
+      addedAt: new Date().toISOString()
+    },
+    {
+      id:"seed-lc-stand-strong", title:"Stand Strong", type:"book",
+      url:"lunch-club/Stand_Strong.docx",
+      description:"A 20-minute high school devotion on staying strong under pressure, built around 1 Corinthians 15:58 (\"Stand strong. Do not let anything move you\"). Includes the Signal in the Storm team game and a small-group discussion guide.",
       addedAt: new Date().toISOString()
     },
   ],
